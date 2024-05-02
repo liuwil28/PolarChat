@@ -13,6 +13,8 @@ http.listen(port, function () {
   console.log("Starting server on port %s", port);
 });
 
+const MAX_NICK_LEN = 50;
+
 const users = [];
 let msg_id = 1;
 io.sockets.on("connection", function(socket) {
@@ -27,6 +29,13 @@ io.sockets.on("connection", function(socket) {
 		// If is empty
 		if(data.nick == ""){
 			socket.emit("force-login", "Nick can't be empty.");
+			nick = null;
+			return ;
+		}
+
+		// If is longer than MAX_NICK_LEN
+		if(data.nick.length > MAX_NICK_LEN){
+			socket.emit("force-login", "Nick can't be longer than " + MAX_NICK_LEN + " characters");
 			nick = null;
 			return ;
 		}

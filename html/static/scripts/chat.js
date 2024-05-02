@@ -1,3 +1,5 @@
+const cooldown_ms = 3000;
+
 var Chat = {
 	socket: null,
 
@@ -7,14 +9,18 @@ var Chat = {
 	users: document.getElementById("users"),
 	textarea: document.getElementById("form_input"),
 	send_btn: document.getElementById("send"),
+	slowdown_indicator: document.getElementById("slowdown"),
 
 	is_focused: false,
 	is_online: false,
 	is_typing: false,
 	last_sent_nick: null,
+	time_of_last_msg: -cooldown_ms, // To ensure that performance.now() - time_of_last_msg > cooldown_ms on page load
 
 	original_title: document.title,
 	new_title: "New messages...",
+
+	slowdown_fade: undefined,
 
 	scroll: function(){
 		setTimeout(function(){
@@ -151,6 +157,22 @@ var Chat = {
 	send_event: function(){
 		var value = Chat.textarea.value.trim();
 		if(value == "") return ;
+
+		if(performance.now() - Chat.time_of_last_msg < cooldown_ms){
+			Chat.slowdown_indicator.style.opacity = 5;
+
+			typeof Chat.slowdown_fade === "undefined" || clearInterval(Chat.slowdown_fade);
+			Chat.slowdown_fade = setInterval(function(){
+				if(Chat.slowdown_indicator.style.opacity < 0.1){
+					clearInterval(Chat.slowdown_fade);
+					Chat.slowdown_indicator.style.opacity = 0;
+				}
+				Chat.slowdown_indicator.style.opacity -= Chat.slowdown_indicator.style.opacity * 0.1;
+			}, 50);
+
+			return ;
+		}
+		Chat.time_of_last_msg = performance.now();
 
 		console.log("Send message.");
 

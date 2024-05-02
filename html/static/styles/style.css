@@ -275,6 +275,12 @@ a {
 	box-shadow: none;
 }
 
+#slowdown {
+	border-bottom: 4px solid transparent;
+	font-size: 14px;
+	opacity: 0;
+}
+
 #send{
 	background: none;
 	color: white;
